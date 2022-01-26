@@ -1,27 +1,20 @@
 from rest_framework import serializers
-from apps.online_banking.models import User, Account, Action, Transaction,\
+from apps.online_banking.models import Customer, Account, Action, Transaction,\
     Transfer
 
 
-class AuthSerializer(serializers.Serializer):
-    email = serializers.EmailField(max_length=60)
-    password = serializers.CharField(max_length=128)
+class CustomerSerializer(serializers.ModelSerializer):
 
-
-class UserCreateSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
+        model = Customer
         fields = ('id', 'first_name', 'last_name', 'middle_name',
-                  'email', 'avatar', 'date_of_birth', 'country', 'city',
-                  'password')
+                  'date_of_birth', 'country', 'city', 'image')
+        read_only_fields = ('id', )
 
-
-class UserDetailSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('id', 'first_name', 'last_name', 'middle_name',
-                  'avatar', 'date_of_birth', 'country', 'city',
-                  'password')
+    def create(self, validated_data):
+        # override standard method to create cumster without pk in url
+        validated_data['user_id'] = self.context['request'].user.id
+        return super(CustomerSerializer, self).create(validated_data)
 
 
 class AccountSerializer(serializers.ModelSerializer):
@@ -44,6 +37,19 @@ class ActionSerializer(serializers.ModelSerializer):
         model = Action
         fields = ('id', 'account', 'amount', 'date')
         read_only_fields = ('id', 'date')
+
+    def create(self, validated_data):
+        # check if enough money to withdraw
+        # mb it's better done by
+        if validated_data['account'].balance + validated_data['amount'] > 0:
+            validated_data['account'].balance += validated_data['amount']
+            validated_data['account'].save()
+        else:
+            raise serializers.ValidationError(
+                ('Not enough money')
+            )
+
+        return super(ActionSerializer, self).create(validated_data)
 
 
 class TransactionSerializer(serializers.ModelSerializer):

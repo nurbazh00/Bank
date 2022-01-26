@@ -1,7 +1,6 @@
-from django.core.exceptions import ValidationError
-
 from apps.online_banking.models import Account, Transaction, Transfer
 from django.db import transaction
+from django.core.exceptions import ValidationError
 
 
 def make_transaction(amount, account, merchant):
@@ -18,6 +17,7 @@ def make_transaction(amount, account, merchant):
 
 
 def make_transfer(from_account, to_account, amount):
+
     if from_account.balance < amount:
         raise(ValueError('Not enough money'))
     if from_account == to_account:
@@ -35,7 +35,8 @@ def make_transfer(from_account, to_account, amount):
         transfer = Transfer.objects.create(
             from_account=from_account,
             to_account=to_account,
-            amount=amount)
+            amount=amount
+        )
 
     return transfer
 
@@ -56,16 +57,5 @@ def check_account_exists(account_id):
     except Exception as e:
         print(e)
         raise ValueError('No such account')
-
-    return account
-
-
-def check_balance_to_withdraw(account, amount):
-    """check if enough money to withdraw"""
-    if account.balance + amount > 0:
-        account.balance += amount
-        account.save()
-    else:
-        raise ValidationError('Not enough money')
 
     return account

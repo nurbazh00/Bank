@@ -1,15 +1,15 @@
 from django.contrib import admin
 from django.utils.safestring import mark_safe
 
-from apps.online_banking.models import User, Account, Action, Transaction,\
+from apps.online_banking.models import Customer, Account, Action, Transaction,\
     Transfer
 
 
-@admin.register(User)
+@admin.register(Customer)
 class UserAdmin(admin.ModelAdmin):
     list_display = (
-        'id', 'first_name', 'last_name', 'middle_name', 'email', 'avatar',
-        'date_of_birth', 'country', 'city'
+        'first_name', 'last_name', 'middle_name',
+        'date_of_birth', 'country', 'city', 'image'
     )
 
     def get_avatar(self, obj):
@@ -22,29 +22,7 @@ class UserAdmin(admin.ModelAdmin):
     get_avatar.short_description = 'Фото'
 
 
-@admin.register(Account)
-class AccountAdmin(admin.ModelAdmin):
-    list_display = (
-        'balance', 'user',
-    )
-
-
-@admin.register(Action)
-class ActionAdmin(admin.ModelAdmin):
-    list_display = (
-        'amount', 'date', 'account'
-    )
-
-
-@admin.register(Transaction)
-class TransactionAdmin(admin.ModelAdmin):
-    list_display = (
-        'amount', 'date', 'account', 'merchant'
-    )
-
-
-@admin.register(Transfer)
-class TransferAdmin(admin.ModelAdmin):
-    list_display = (
-        'from_account', 'to_account', 'amount'
-    )
+admin.site.register(Account)
+admin.site.register(Action)
+admin.site.register(Transaction)
+admin.site.register(Transfer)
